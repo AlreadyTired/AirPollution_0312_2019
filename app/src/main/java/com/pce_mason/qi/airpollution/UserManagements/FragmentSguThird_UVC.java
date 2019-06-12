@@ -1,13 +1,12 @@
 package com.pce_mason.qi.airpollution.UserManagements;
 
 import android.content.Context;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,7 +31,6 @@ import com.pce_mason.qi.airpollution.SignInActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.annotation.Inherited;
 import java.util.concurrent.ExecutionException;
 
 import static com.pce_mason.qi.airpollution.AppClientHeader.CustomTimer.R102;
@@ -40,7 +38,7 @@ import static com.pce_mason.qi.airpollution.AppClientHeader.CustomTimer.T102;
 import static com.pce_mason.qi.airpollution.MainActivity.APP_STATE;
 import static com.pce_mason.qi.airpollution.MainActivity.StateCheck;
 
-public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBackPressedListener{
+public class FragmentSguThird_UVC extends Fragment implements SignUpActivity.onKeyBackPressedListener{
 
     private int AUTHENTICATION_CODE_LENGTH = 20;
     private View view;
@@ -56,7 +54,7 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
     private int temporaryClientId;
     private long remindTime;
 
-    public FragmentSguThird() {
+    public FragmentSguThird_UVC() {
         // Required empty public constructor
     }
     @Override
@@ -84,6 +82,20 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
         EmailView.setText(getString(R.string.uvc_email_set) + " " + Email);
         verificationTimer = (TextView) view.findViewById(R.id.verificationTimer);
 
+        AuthenticationCodeEdt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    setFocusedEdtBackground(AuthenticationCodeEdt);
+                }
+                if(!hasFocus)
+                {
+                    setEnableEdtBackground(AuthenticationCodeEdt);
+                }
+            }
+        });
+
         ContinueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,9 +122,9 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
         return view;
     }
 
-    public static FragmentSguThird getInstance(String Email, String VerificationCode, String TCI)
+    public static FragmentSguThird_UVC getInstance(String Email, String VerificationCode, String TCI)
     {
-        FragmentSguThird mFragment = new FragmentSguThird();
+        FragmentSguThird_UVC mFragment = new FragmentSguThird_UVC();
         Bundle args = new Bundle();
         args.putString("Email",Email);
         args.putString("VerificationCode",VerificationCode);
@@ -131,6 +143,7 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
         }
         // Reset errors.
         AuthticationCodeLayout.setError(null);
+        setEnableEdtBackground(AuthenticationCodeEdt);
 
         // Store values at the time of the login attempt.
         String authentication = AuthenticationCodeEdt.getText().toString();
@@ -141,7 +154,9 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
         hideKeyboard();
         // Check for a valid email address.
         if (TextUtils.isEmpty(authentication)) {
+            AuthticationCodeLayout.setErrorTextAppearance(R.style.errorcolor);
             AuthticationCodeLayout.setError(getString(R.string.Authentication_code_blank_error));
+            setErrorEdtBackground(AuthenticationCodeEdt);
             focusView = AuthenticationCodeEdt;
             cancel = true;
         } else if (!isAuthenticationCodeValid(authentication)) {
@@ -154,6 +169,7 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
+            setErrorEdtBackground((EditText)focusView);
         } else {
             Log.d("SGU_UVC_REQ_TEST","UVC Input Verified");
             requestMessageProcess();
@@ -250,7 +266,9 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
                         case ResultCode.RESCODE_SAP_UVC_INCORRECT_AUTHENTICATION_CODE:
                             APP_STATE = StateNumber.STATE_SAP.USER_DUPLICATE_REQUESTED_STATE;
                             StateCheck("UVC_RSP");
+                            AuthticationCodeLayout.setErrorTextAppearance(R.style.errorcolor);
                             AuthticationCodeLayout.setError(getString(R.string.error_incorrect_authentication));
+                            setErrorEdtBackground(AuthenticationCodeEdt);
                             AuthenticationCodeEdt.requestFocus();
                             break;
                     }
@@ -319,5 +337,22 @@ public class FragmentSguThird extends Fragment implements SignUpActivity.onKeyBa
             validationTimer = null;
         }
         super.onDetach();
+    }
+
+    public void setEnableEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_enable);
+        Edt.setTextColor(Color.parseColor(getString(R.string.Normal_Color)));
+    }
+
+    public void setFocusedEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_focused);
+    }
+
+    public void setErrorEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_error);
+        Edt.setTextColor(Color.parseColor(getString(R.string.Error_Color)));
     }
 }

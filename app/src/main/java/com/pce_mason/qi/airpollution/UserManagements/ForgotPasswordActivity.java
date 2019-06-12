@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -44,9 +47,9 @@ import static com.pce_mason.qi.airpollution.MainActivity.StateCheck;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-    private AutoCompleteTextView emailForgot;
-    private EditText firstNameForgot, lastNameForgot, birthDateForgot;
-    private LinearLayout forgotMainLayout;
+    private TextInputLayout FirstNameLayout, LastNameLayout, BirthdateLayout, EmailLayout;
+    private EditText firstNameForgot, lastNameForgot, birthDateForgot, emailForgot;
+    private CoordinatorLayout forgotMainLayout;
     private int temporaryClientId;
 
     private HttpConnectionThread mAuthTask = null;
@@ -54,9 +57,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        forgotMainLayout = (LinearLayout) findViewById(R.id.forgotMainLayout);
+        forgotMainLayout = (CoordinatorLayout) findViewById(R.id.forgotMainLayout);
         forgotMainLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -65,17 +66,69 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             }
         });
         //Input User Information
-        emailForgot = (AutoCompleteTextView) findViewById(R.id.forgotEmail);
+        EmailLayout = (TextInputLayout)findViewById(R.id.ForgotPasswordEmailLayout);
+        FirstNameLayout = (TextInputLayout)findViewById(R.id.ForgotPasswordFirstnameLayout);
+        LastNameLayout = (TextInputLayout)findViewById(R.id.ForgotPasswordLastnameLayout);
+        BirthdateLayout = (TextInputLayout)findViewById(R.id.ForgotPasswordBirthLayout);
+        emailForgot = (EditText) findViewById(R.id.forgotEmail);
         firstNameForgot = (EditText) findViewById(R.id.forgotFirstName);
         lastNameForgot = (EditText) findViewById(R.id.forgotLastName);
         birthDateForgot = (EditText) findViewById(R.id.forgotBirth);
         birthDateForgot.setText(getCurrentDate());
+
+        emailForgot.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    setFocusedEdtBackground(emailForgot);
+                }
+                if(!hasFocus)
+                {
+                    setEnableEdtBackground(emailForgot);
+                }
+            }
+        });
+
+        firstNameForgot.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    setFocusedEdtBackground(firstNameForgot);
+                }
+                if(!hasFocus)
+                {
+                    setEnableEdtBackground(firstNameForgot);
+                }
+            }
+        });
+
+        lastNameForgot.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus)
+                {
+                    setFocusedEdtBackground(lastNameForgot);
+                }
+                if(!hasFocus)
+                {
+                    setEnableEdtBackground(lastNameForgot);
+                }
+            }
+        });
+
         birthDateForgot.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onFocusChange(View view, boolean focusOn) {
-                if (focusOn){
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (hasFocus){
+                    setFocusedEdtBackground(birthDateForgot);
                     showDatePickerDialog(view);
                     hideKeyboard(ForgotPasswordActivity.this);
+                }
+                if(!hasFocus)
+                {
+                    setEnableEdtBackground(birthDateForgot);
                 }
             }
         });
@@ -125,10 +178,15 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
 
         // Reset errors.
-        emailForgot.setError(null);
-        firstNameForgot.setError(null);
-        lastNameForgot.setError(null);
-        birthDateForgot.setError(null);
+        EmailLayout.setError(null);
+        FirstNameLayout.setError(null);
+        LastNameLayout.setError(null);
+        BirthdateLayout.setError(null);
+        setEnableEdtBackground(emailForgot);
+        setEnableEdtBackground(firstNameForgot);
+        setEnableEdtBackground(lastNameForgot);
+        setEnableEdtBackground(birthDateForgot);
+
 
         // Store values at the time of the login attempt.
         String email = emailForgot.getText().toString();
@@ -141,29 +199,39 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         hideKeyboard(ForgotPasswordActivity.this);
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            emailForgot.setError(getString(R.string.error_field_required));
+            EmailLayout.setErrorTextAppearance(R.style.errorcolor);
+            EmailLayout.setError(getString(R.string.error_field_required));
+            setErrorEdtBackground(emailForgot);
             focusView = emailForgot;
             cancel = true;
         } else if (!isEmailValid(email)) {
-            emailForgot.setError(getString(R.string.error_invalid_email));
+            EmailLayout.setErrorTextAppearance(R.style.errorcolor);
+            EmailLayout.setError(getString(R.string.error_invalid_email));
+            setErrorEdtBackground(emailForgot);
             focusView = emailForgot;
             cancel = true;
         }
         // Check for a valid first name
         if (TextUtils.isEmpty(firstName)) {
-            firstNameForgot.setError(getString(R.string.error_field_required));
+            FirstNameLayout.setErrorTextAppearance(R.style.errorcolor);
+            FirstNameLayout.setError(getString(R.string.error_field_required));
+            setErrorEdtBackground(firstNameForgot);
             focusView = firstNameForgot;
             cancel = true;
         }
         // Check for a valid last name
         if (TextUtils.isEmpty(lastName)) {
-            lastNameForgot.setError(getString(R.string.error_field_required));
+            LastNameLayout.setErrorTextAppearance(R.style.errorcolor);
+            LastNameLayout.setError(getString(R.string.error_field_required));
+            setErrorEdtBackground(lastNameForgot);
             focusView = lastNameForgot;
             cancel = true;
         }
         // Check for a valid birthDate
         if (TextUtils.isEmpty(birthDate)) {
-            birthDateForgot.setError(getString(R.string.error_field_required));
+            BirthdateLayout.setErrorTextAppearance(R.style.errorcolor);
+            BirthdateLayout.setError(getString(R.string.error_field_required));
+            setErrorEdtBackground(birthDateForgot);
             focusView = birthDateForgot;
             cancel = true;
         }
@@ -171,6 +239,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
+            setErrorEdtBackground((EditText)focusView);
         } else {
             Log.d("FPU_REQ_TEST","Input Format Verified");
             requestMessageProcess();
@@ -250,13 +319,21 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                             requestMessageProcess();
                             break;
                         case ResultCode.RESCODE_SAP_FPU_INCORRECT_USER_INFORMATION:
-                            firstNameForgot.setError(getString(R.string.error_incorrect_user_info));
+                            FirstNameLayout.setErrorTextAppearance(R.style.errorcolor);
+                            FirstNameLayout.setError(getString(R.string.error_incorrect_user_info));
                             firstNameForgot.requestFocus();
-                            lastNameForgot.setError(getString(R.string.error_incorrect_user_info));
-                            birthDateForgot.setError(getString(R.string.error_incorrect_user_info));
+                            LastNameLayout.setErrorTextAppearance(R.style.errorcolor);
+                            LastNameLayout.setError(getString(R.string.error_incorrect_user_info));
+                            BirthdateLayout.setErrorTextAppearance(R.style.errorcolor);
+                            BirthdateLayout.setError(getString(R.string.error_incorrect_user_info));
+                            setErrorEdtBackground(firstNameForgot);
+                            setErrorEdtBackground(lastNameForgot);
+                            setErrorEdtBackground(birthDateForgot);
                             break;
                         case ResultCode.RESCODE_SAP_FPU_NOT_EXIST_USER_ID:
-                            emailForgot.setError(getString(R.string.not_exist_email));
+                            EmailLayout.setErrorTextAppearance(R.style.errorcolor);
+                            EmailLayout.setError(getString(R.string.not_exist_email));
+                            setErrorEdtBackground(emailForgot);
                             emailForgot.requestFocus();
                             break;
                     }
@@ -296,5 +373,22 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void setEnableEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_enable);
+        Edt.setTextColor(Color.parseColor(getString(R.string.Normal_Color)));
+    }
+
+    public void setFocusedEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_focused);
+    }
+
+    public void setErrorEdtBackground(EditText Edt)
+    {
+        Edt.setBackgroundResource(R.drawable.edittext_border_error);
+        Edt.setTextColor(Color.parseColor(getString(R.string.Error_Color)));
     }
 }
